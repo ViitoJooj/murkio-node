@@ -67,3 +67,17 @@ application and canvas (escaped for `<script>`), so the canvas draws at once.
 `canvas()`, `emailInput()`, `passwordInput()`, `keepLogged()`, `loginButton(text)`,
 `registerButton(text)` and `errorMessage()` return the components' HTML with escaped
 attributes.
+
+## Developing
+
+This repository is a git submodule of the Murkio identity service
+(`libs/external/node`) and is developed from there: the JavaScript packages share one
+npm workspace, and the tests read the contract, the vectors and the fixtures every Murkio
+SDK shares (`libs/spec`).
+
+```sh
+# in libs/ of the service repository, cloned with --recurse-submodules
+npm ci
+npm run build
+npm test
+```
