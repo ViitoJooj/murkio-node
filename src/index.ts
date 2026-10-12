@@ -1,17 +1,6 @@
 import { readRequest, type RequestLike } from './request';
 import { MurkioServer, type AuthenticateOptions, type AuthResult, type MurkioServerOptions } from './server';
-import {
-  BROWSER_SDK,
-  canvasTag,
-  fieldTag,
-  handshakePage,
-  HANDSHAKE_GUARD,
-  safeJson,
-  scriptTag,
-  type CanvasOptions,
-  type FieldOptions,
-  type HeadOptions,
-} from './html';
+import { BROWSER_SDK, canvasTag, fieldTag, handshakePage, HANDSHAKE_GUARD, safeJson, scriptTag, type CanvasOptions, type FieldOptions, type HeadOptions } from './html';
 
 export interface ProtectOptions extends AuthenticateOptions {
   /** Answer 401 (or redirect to signInUrl) when nobody is signed in. */
@@ -116,10 +105,7 @@ export class Murkio extends MurkioServer {
     }
 
     const navigation = info.method === 'GET' && (info.header('sec-fetch-mode') === 'navigate' || (info.header('accept') ?? '').includes('text/html'));
-    if (
-      options.handshake !== false && navigation && result.signedInHint &&
-      (result.reason === 'missing' || result.reason === 'expired') && info.cookie(HANDSHAKE_GUARD) === null
-    ) {
+    if (options.handshake !== false && navigation && result.signedInHint && (result.reason === 'missing' || result.reason === 'expired') && info.cookie(HANDSHAKE_GUARD) === null) {
       const nonce = randomNonce();
       const secure = info.url.protocol === 'https:' ? '; Secure' : '';
       const scriptOrigin = new URL(this.script.url ?? BROWSER_SDK.url, info.url).origin;
@@ -131,7 +117,7 @@ export class Murkio extends MurkioServer {
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'no-store',
             'Content-Security-Policy': `default-src 'none'; script-src 'nonce-${nonce}' ${scriptOrigin}; connect-src ${new URL(this.apiUrl).origin}; base-uri 'none'; frame-ancestors 'none'`,
-            'Set-Cookie': `${HANDSHAKE_GUARD}=1; Path=/; Max-Age=30; SameSite=Lax${secure}`,
+            'Set-Cookie': `${HANDSHAKE_GUARD}=1; Path=/; Max-Age=30; HttpOnly; SameSite=Lax${secure}`,
           },
         }),
       };
@@ -154,7 +140,9 @@ export class Murkio extends MurkioServer {
         if (res.locals) res.locals.murkio = result;
         if (!response) return next();
         res.status(response.status);
-        response.headers.forEach((value, name) => res.setHeader(name, value));
+        response.headers.forEach((value, name) => {
+          res.setHeader(name, value);
+        });
         res.end(await response.text());
       }, next);
     };
@@ -171,3 +159,4 @@ export { BROWSER_SDK, escapeAttribute, safeJson } from './html';
 export type { CanvasOptions, FieldOptions, HeadOptions } from './html';
 export { acceptedCookieNames, fnv1a32 } from './keys';
 export type { RequestLike } from './request';
+export type { ClientBootstrap, Me, PublicConfig } from './types';
