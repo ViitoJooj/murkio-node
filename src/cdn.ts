@@ -4,5 +4,5 @@
 export const BROWSER_SDK = {
   version: '0.1.0',
   url: 'https://cdn.jsdelivr.net/npm/@murkio/html@0.1.0/dist/murkio.js',
-  integrity: 'sha384-c1uw6fHl7lO2UKbhw6gSkHmvLuJTh9DD3fAzRYZnHSUwhMuN5I8H2BnyGrYlnoMa',
+  integrity: 'sha384-0Ix1nf5S3FTokvbSK46OUqNd1tlXmYzC51h0Rr3aOpCUz/+GLp+yy28iG1aFuSCi',
 };
