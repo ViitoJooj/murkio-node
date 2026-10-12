@@ -144,6 +144,7 @@ describe('protect', () => {
     expect(html).toContain(`nonce="${nonce}"`);
     expect(html).toContain(`data-murkio-key="${PK}"`);
     expect(response?.headers.get('Set-Cookie')).toContain('murkio_handshake=1');
+    expect(response?.headers.get('Set-Cookie')).toContain('HttpOnly');
 
     const looped = await murkio().protect(request('https://app.example.com/dashboard', { ...navigation, cookie: `${cookie}; murkio_handshake=1` }), { required: true });
     expect(looped.response?.status).toBe(401);
@@ -159,13 +160,28 @@ describe('protect', () => {
     const m = murkio();
     const middleware = m.express({ required: true });
     const req = { method: 'GET', url: '/api', headers: { host: 'app.example.com', authorization: `Bearer ${await token()}` } } as Record<string, unknown>;
-    await new Promise<void>((resolve, reject) => middleware(req as never, { status: () => reject(new Error('unexpected')), setHeader: () => undefined, end: () => undefined, locals: {} } as never, () => resolve()));
+    await new Promise<void>((resolve, reject) =>
+      middleware(req as never, { status: () => reject(new Error('unexpected')), setHeader: () => undefined, end: () => undefined, locals: {} } as never, () => resolve()),
+    );
     expect((req.murkio as { session: { userId: string } }).session.userId).toBe('user-1');
 
     const denied: { status?: number; body?: string } = {};
-    const res = { status(code: number) { denied.status = code; return res; }, setHeader: () => undefined, end(body: string) { denied.body = body; }, locals: {} };
+    const res = {
+      status(code: number) {
+        denied.status = code;
+        return res;
+      },
+      setHeader: () => undefined,
+      end(body: string) {
+        denied.body = body;
+      },
+      locals: {},
+    };
     await new Promise<void>((resolve) => {
-      res.end = (body: string) => { denied.body = body; resolve(); };
+      res.end = (body: string) => {
+        denied.body = body;
+        resolve();
+      };
       middleware({ method: 'GET', url: '/api', headers: { host: 'app.example.com' } } as never, res as never, () => resolve());
     });
     expect(denied.status).toBe(401);
@@ -180,13 +196,15 @@ describe('html helpers', () => {
     );
     expect(BROWSER_SDK.integrity).toMatch(/^sha384-/);
     expect(m.canvas({ className: '" onload="x', screen: 'sign_up' })).toBe('<murkio-identity-canvas screen="sign_up" class="&quot; onload=&quot;x"></murkio-identity-canvas>');
-    expect(m.emailInput({ className: 'input', placeholder: 'you@example.com' })).toBe('<murkio-identity-email-input class="input" placeholder="you@example.com"></murkio-identity-email-input>');
+    expect(m.emailInput({ className: 'input', placeholder: 'you@example.com' })).toBe(
+      '<murkio-identity-email-input class="input" placeholder="you@example.com"></murkio-identity-email-input>',
+    );
     expect(m.loginButton('Entrar', { className: 'btn' })).toBe('<murkio-identity-login-button class="btn" label="Entrar"></murkio-identity-login-button>');
 
     const inline = await m.bootstrapScript();
-    expect(inline).toContain("data-generated-at=");
+    expect(inline).toContain('data-generated-at=');
     expect(inline).not.toContain('</script><script>');
     expect(JSON.parse(inline.replace(/^<script[^>]*>|<\/script>$/g, '')).canvas.document.title).toBe('</script><script>alert(1)</script>');
-    expect(safeJson(' ')).toBe('"\\u2028"');
+    expect(safeJson('\u2028')).toBe('"\\u2028"');
   });
 });

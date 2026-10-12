@@ -1,4 +1,4 @@
-import type { ClientBootstrap, Me } from '@murkio/html';
+import type { ClientBootstrap, Me } from './types';
 import type { JWTPayload } from 'jose';
 import { JWTExpired } from 'jose/errors';
 import { createRemoteJWKSet, customFetch } from 'jose/jwks/remote';

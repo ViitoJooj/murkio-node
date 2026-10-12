@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createMurkio, fnv1a32 } from '../src';
 
-const vectors = JSON.parse(readFileSync(join(__dirname, '../../../spec/server/vectors.json'), 'utf8')) as {
+const vectors = JSON.parse(readFileSync(join(__dirname, '../spec/server/vectors.json'), 'utf8')) as {
   application_id: string;
   issuer: string;
   jwks: unknown;
@@ -13,14 +13,11 @@ const vectors = JSON.parse(readFileSync(join(__dirname, '../../../spec/server/ve
 
 const fetch = (async (input: RequestInfo | URL) => {
   const path = new URL(String(input)).pathname;
-  const body =
-    path === '/v1/client'
-      ? { data: { application_id: vectors.application_id, issuer: vectors.issuer, jwks_url: '/jwks.json', config: {}, canvas: {} } }
-      : vectors.jwks;
+  const body = path === '/v1/client' ? { data: { application_id: vectors.application_id, issuer: vectors.issuer, jwks_url: '/jwks.json', config: {}, canvas: {} } } : vectors.jwks;
   return new Response(JSON.stringify(body), { status: 200 });
 }) as typeof globalThis.fetch;
 
-/** The same tokens must get the same verdict in every server SDK (libs/spec/server). */
+/** The same tokens must get the same verdict in every server SDK (spec/server). */
 describe('shared vectors', () => {
   it('hashes publishable keys like the other SDKs', () => {
     for (const [value, hash] of Object.entries(vectors.cookie_hash)) expect(fnv1a32(value)).toBe(hash);

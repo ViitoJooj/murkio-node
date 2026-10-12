@@ -1,12 +1,6 @@
-import htmlPackage from '../../html/package.json';
-import sri from '../../html/dist/sri.json';
+import { BROWSER_SDK } from './cdn';
 
-/** The browser bundle these helpers load: the @murkio/html built with this release, pinned with its SRI hash. */
-export const BROWSER_SDK = {
-  version: htmlPackage.version,
-  url: `https://cdn.jsdelivr.net/npm/@murkio/html@${htmlPackage.version}/dist/murkio.js`,
-  integrity: sri['murkio.js'],
-};
+export { BROWSER_SDK };
 
 export function escapeAttribute(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
