@@ -1,0 +1,5 @@
+# The runtime dependencies this SDK ships with, one per line, each with the
+# reason it is needed. infra/pipeline/verify_dependencies.py fails when the
+# manifest and this list disagree.
+
+jose # verifies the EdDSA signature of the access token against the application's JWKS, on Node and on edge runtimes
